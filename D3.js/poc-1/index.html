@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>D3.js POC</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>D3.js Interactive Bar Chart</h1>
+    <p class="subtitle">Hover over bars for details • Click buttons to regenerate data</p>
+    
+    <div class="controls">
+      <button onclick="updateData()">🔄 Randomize Data</button>
+      <button onclick="sortBars('ascending')">📈 Sort Ascending</button>
+      <button onclick="sortBars('descending')">📉 Sort Descending</button>
+      <button onclick="addBar()">➕ Add Bar</button>
+      <button onclick="removeBar()">➖ Remove Bar</button>
+    </div>
+    
+    <div id="chart"></div>
+  </div>
+  <script src="custom-d3.js"></script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>D3 API Bar Chart PoC</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+    select, input {
+      margin-right: 10px;
+      padding: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<h3>D3.js API-Driven Bar Chart</h3>
+
+<!-- Controls -->
+<label>Sort:</label>
+<select id="sort">
+  <option value="asc">Ascending</option>
+  <option value="desc">Descending</option>
+</select>
+
+<label>Min Value:</label>
+<input type="number" id="filter" value="0" />
+
+<svg width="700" height="400"></svg>
+
+<script>
+/* ---------------- API DATA (Mock) ---------------- */
+async function fetchData() {
+  // Simulating API response
+  return [
+    { name: "Product A", value: 30 },
+    { name: "Product B", value: 80 },
+    { name: "Product C", value: 45 },
+    { name: "Product D", value: 60 },
+    { name: "Product E", value: 20 }
+  ];
+}
+
+/* ---------------- SETUP ---------------- */
+const svg = d3.select("svg");
+const width = 700;
+const height = 400;
+const margin = { top: 30, right: 20, bottom: 60, left: 60 };
+
+const chart = svg.append("g");
+
+const xAxisGroup = svg.append("g")
+  .attr("transform", `translate(0,${height - margin.bottom})`);
+
+const yAxisGroup = svg.append("g")
+  .attr("transform", `translate(${margin.left},0)`);
+
+/* ---------------- RENDER FUNCTION ---------------- */
+function render(data) {
+
+  // Scales
+  const x = d3.scaleBand()
+    .domain(data.map(d => d.name))
+    .range([margin.left, width - margin.right])
+    .padding(0.3);
+
+  const y = d3.scaleLinear()
+    .domain([0, d3.max(data, d => d.value)])
+    .nice()
+    .range([height - margin.bottom, margin.top]);
+
+  // Axes
+  xAxisGroup.call(d3.axisBottom(x));
+  yAxisGroup.call(d3.axisLeft(y));
+
+  // DATA JOIN
+  const bars = chart.selectAll("rect")
+    .data(data, d => d.name);
+
+  // EXIT
+  bars.exit().remove();
+
+  // UPDATE
+  bars
+    .attr("x", d => x(d.name))
+    .attr("y", d => y(d.value))
+    .attr("height", d => y(0) - y(d.value))
+    .attr("width", x.bandwidth());
+
+  // ENTER
+  bars.enter()
+    .append("rect")
+    .attr("x", d => x(d.name))
+    .attr("y", y(0))
+    .attr("height", 0)
+    .attr("width", x.bandwidth())
+    .attr("fill", "#38bdf8")
+    .transition()
+    .duration(600)
+    .attr("y", d => y(d.value))
+    .attr("height", d => y(0) - y(d.value));
+}
+
+/* ---------------- INTERACTION ---------------- */
+let rawData = [];
+
+fetchData().then(data => {
+  rawData = data;
+  updateChart();
+});
+
+function updateChart() {
+  let filtered = rawData.filter(
+    d => d.value >= +document.getElementById("filter").value
+  );
+
+  const sortType = document.getElementById("sort").value;
+  filtered.sort((a, b) =>
+    sortType === "asc" ? a.value - b.value : b.value - a.value
+  );
+
+  render(filtered);
+}
+
+document.getElementById("sort").addEventListener("change", updateChart);
+document.getElementById("filter").addEventListener("input", updateChart);
+</script>
+
+</body>
+</html>

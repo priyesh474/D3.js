@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>D3 Pie & Donut Chart PoC</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+      text-align: center;
+    }
+    .tooltip {
+      position: absolute;
+      background: #020617;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      pointer-events: none;
+      opacity: 0;
+    }
+    section {
+      position: relative;
+    }
+  </style>
+</head>
+<body>
+
+<h3>D3 Pie & Donut Chart (Dynamic Update)</h3>
+<svg id="donutChart" width="400" height="400"></svg>
+
+<section>
+  <h3>D3 Interactive Bar + Line Chart</h3>
+  <svg id="barLineChart" width="750" height="420"></svg>
+  <div class="tooltip"></div>
+</section>
+
+<script>
+/* ------------------ DONUT SETUP ------------------ */
+const donutWidth = 400;
+const donutHeight = 400;
+const donutRadius = Math.min(donutWidth, donutHeight) / 2 - 20;
+
+const donutSvg = d3.select("#donutChart")
+  .append("g")
+  .attr("transform", `translate(${donutWidth / 2},${donutHeight / 2})`);
+
+const donutColor = d3.scaleOrdinal(d3.schemeTableau10);
+
+const donutPie = d3.pie()
+  .value(d => d.value)
+  .sort(null);
+
+const donutArc = d3.arc()
+  .innerRadius(donutRadius * 0.5)
+  .outerRadius(donutRadius);
+
+let donutData = [
+  { label: "A", value: 30 },
+  { label: "B", value: 50 },
+  { label: "C", value: 20 }
+];
+
+function renderDonut(data) {
+  const arcs = donutSvg.selectAll("path")
+    .data(donutPie(data), d => d.data.label);
+
+  arcs.exit()
+    .transition()
+    .duration(400)
+    .style("opacity", 0)
+    .remove();
+
+  arcs.transition()
+    .duration(700)
+    .attrTween("d", function(d) {
+      const i = d3.interpolate(this._current, d);
+      this._current = i(1);
+      return t => donutArc(i(t));
+    });
+
+  arcs.enter()
+    .append("path")
+    .attr("fill", d => donutColor(d.data.label))
+    .each(function(d) { this._current = d; })
+    .attr("d", donutArc)
+    .style("opacity", 0)
+    .transition()
+    .duration(700)
+    .style("opacity", 1);
+}
+
+renderDonut(donutData);
+
+setInterval(() => {
+  donutData = d3.range(Math.floor(Math.random() * 4) + 2).map((_, i) => ({
+    label: String.fromCharCode(65 + i),
+    value: Math.floor(Math.random() * 100) + 10
+  }));
+  renderDonut(donutData);
+}, 2000);
+</script>
+
+<script>
+/* ---------------- BAR + LINE SETUP ---------------- */
+const chartSvg = d3.select("#barLineChart");
+const tooltip = d3.select(".tooltip");
+
+const width = 750;
+const height = 420;
+const margin = { top: 40, right: 30, bottom: 60, left: 60 };
+
+const chartData = [
+  { month: "Jan", bar: 30, line: 20 },
+  { month: "Feb", bar: 50, line: 35 },
+  { month: "Mar", bar: 40, line: 30 },
+  { month: "Apr", bar: 70, line: 55 },
+  { month: "May", bar: 60, line: 50 }
+];
+
+const x = d3.scaleBand()
+  .domain(chartData.map(d => d.month))
+  .range([margin.left, width - margin.right])
+  .padding(0.3);
+
+const y = d3.scaleLinear()
+  .domain([0, d3.max(chartData, d => Math.max(d.bar, d.line))])
+  .nice()
+  .range([height - margin.bottom, margin.top]);
+
+const color = d3.scaleOrdinal()
+  .domain(["Bar", "Line"])
+  .range(["#38bdf8", "#22c55e"]);
+
+chartSvg.append("g")
+  .attr("transform", `translate(0,${height - margin.bottom})`)
+  .call(d3.axisBottom(x));
+
+chartSvg.append("g")
+  .attr("transform", `translate(${margin.left},0)`)
+  .call(d3.axisLeft(y));
+
+/* Bars */
+chartSvg.selectAll(".bar")
+  .data(chartData)
+  .enter()
+  .append("rect")
+  .attr("x", d => x(d.month))
+  .attr("y", y(0))
+  .attr("width", x.bandwidth())
+  .attr("height", 0)
+  .attr("fill", color("Bar"))
+  .transition()
+  .duration(800)
+  .ease(d3.easeCubicOut)
+  .attr("y", d => y(d.bar))
+  .attr("height", d => y(0) - y(d.bar));
+
+/* Line */
+const line = d3.line()
+  .x(d => x(d.month) + x.bandwidth() / 2)
+  .y(d => y(d.line));
+
+chartSvg.append("path")
+  .datum(chartData)
+  .attr("fill", "none")
+  .attr("stroke", color("Line"))
+  .attr("stroke-width", 3)
+  .attr("d", line);
+
+/* Points */
+chartSvg.selectAll(".point")
+  .data(chartData)
+  .enter()
+  .append("circle")
+  .attr("cx", d => x(d.month) + x.bandwidth() / 2)
+  .attr("cy", d => y(d.line))
+  .attr("r", 5)
+  .attr("fill", color("Line"));
+</script>
+
+
+
+</body>
+</html>

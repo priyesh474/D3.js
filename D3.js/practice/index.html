@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>D3 Line Plot (Vanilla JS)</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <svg id="chart"></svg>
+
+  <hr>
+
+  <div id="box">Hello</div>
+  <ul>
+    <li>Item A</li>
+    <li>Item B</li>
+    <li>Item C</li>
+  </ul>
+
+  <hr>
+
+  <ul id="list"></ul>
+
+  <hr>
+
+  <h3>Dynamic List</h3>
+  <ul id="list"></ul>
+
+  <h3>Rectangles (Bars)</h3>
+  <svg id="rectChart" width="400" height="120"></svg>
+
+  <h3>Circles</h3>
+  <svg id="circleChart" width="400" height="120"></svg>
+
+  <hr>
+
+  <svg width="500" height="200" id="svg-sample"></svg>
+
+  <script>
+    const data = [10, 30, 25, 40, 35, 55, 45, 60];
+
+    const width = 640;
+    const height = 400;
+    const marginTop = 20;
+    const marginRight = 20;
+    const marginBottom = 20;
+    const marginLeft = 20;
+
+    const svg = d3
+      .select("#chart")
+      .attr("width", width)
+      .attr("height", height);
+
+    const x = d3.scaleLinear()
+      .domain([0, data.length - 1])
+      .range([marginLeft, width - marginRight]);
+
+    const y = d3.scaleLinear()
+      .domain(d3.extent(data))
+      .range([height - marginBottom, marginTop]);
+
+    const line = d3.line()
+      .x((d, i) => x(i))
+      .y(d => y(d));
+
+    svg.append("path")
+      .datum(data)
+      .attr("fill", "none")
+      .attr("stroke", "currentColor")
+      .attr("stroke-width", 1.5)
+      .attr("d", line);
+
+    svg.append("g")
+      .attr("fill", "white")
+      .attr("stroke", "currentColor")
+      .attr("stroke-width", 1.5)
+      .selectAll("circle")
+      .data(data)
+      .enter()
+      .append("circle")
+      .attr("cx", (d, i) => x(i))
+      .attr("cy", d => y(d))
+      .attr("r", 2.5);
+  </script>
+
+  <script>
+  d3.select("#box")
+    .style("color", "blue")
+    .text("Updated by d3.select()");
+
+  d3.selectAll("li")
+    .style("color", "green")
+    .style("font-weight", "bold");
+</script>
+
+<script>
+  let data2 = [10, 20, 30];
+
+  function render(data2) {
+    const items = d3.select("#list")
+      .selectAll("li")
+      .data(data2);
+
+    items.enter()
+      .append("li")
+      .merge(items) // UPDATE
+      .text(d => `Value: ${d}`);
+
+    items.exit().remove();
+  }
+
+  render(data2);
+
+  // Update data2 after 2 seconds
+  setTimeout(() => {
+    data2 = [20, 30, 40, 50];
+    render(data2);
+  }, 2000);
+</script>
+
+<script>
+  const data3 = [10, 30, 20, 40, 25];
+
+  d3.select("#list")
+    .selectAll("li")
+    .data(data3)
+    .enter()
+    .append("li")
+    .text(d => `Value: ${d}`);
+
+  d3.select("#rectChart")
+    .selectAll("rect")
+    .data(data3)
+    .enter()
+    .append("rect")
+    .attr("x", (d, i) => i * 70)
+    .attr("y", d => 100 - d)
+    .attr("width", 50)
+    .attr("height", d => d)
+    .attr("fill", "steelblue");
+
+  d3.select("#circleChart")
+    .selectAll("circle")
+    .data(data3)
+    .enter()
+    .append("circle")
+    .attr("cx", (d, i) => i * 70 + 30)
+    .attr("cy", d => 100 - d)
+    .attr("r", d => d / 5)
+    .attr("fill", "orange");
+</script>
+
+<script>
+  const svg4 = d3.select("#svg-sample");
+
+  // Create a group
+  const group = svg4.append("g")
+    .attr("transform", "translate(50,20)");
+
+  // Rectangle
+  group.append("rect")
+    .attr("x", 0)
+    .attr("y", 50)
+    .attr("width", 80)
+    .attr("height", 40)
+    .attr("fill", "steelblue");
+
+  // Circle
+  group.append("circle")
+    .attr("cx", 150)
+    .attr("cy", 70)
+    .attr("r", 20)
+    .attr("fill", "orange");
+
+  // Line
+  group.append("line")
+    .attr("x1", 220)
+    .attr("y1", 70)
+    .attr("x2", 320)
+    .attr("y2", 70)
+    .attr("stroke", "green")
+    .attr("stroke-width", 3);
+</script>
+
+</body>
+</html>
+
+
+

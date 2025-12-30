@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>D3 Scales & Axes PoC</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+    text {
+      fill: #e5e7eb;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+
+<h3>D3 Scale & Axis PoC</h3>
+
+<svg width="800" height="450"></svg>
+
+<script>
+  const svg = d3.select("svg");
+  const width = 800;
+  const height = 450;
+  const margin = { top: 30, right: 30, bottom: 50, left: 60 };
+
+  /* ------------------------------------------------
+     1️⃣ Linear Scale (Numbers → Pixels)
+  ------------------------------------------------ */
+  const linearScale = d3.scaleLinear()
+    .domain([0, 100])
+    .range([margin.left, width - margin.right]);
+
+  svg.append("g")
+    .attr("transform", `translate(0,${height - margin.bottom})`)
+    .call(d3.axisBottom(linearScale));
+
+  svg.append("text")
+    .attr("x", margin.left)
+    .attr("y", height - margin.bottom - 10)
+    .text("Linear Scale (0–100)");
+
+  /* ------------------------------------------------
+     2️⃣ Band Scale (Categories → Bars)
+  ------------------------------------------------ */
+  const categories = ["A", "B", "C", "D"];
+
+  const bandScale = d3.scaleBand()
+    .domain(categories)
+    .range([margin.left, width - margin.right])
+    .padding(0.4);
+
+  const bandY = d3.scaleLinear()
+    .domain([0, 50])
+    .range([height - 120, height - 250]);
+
+  svg.append("g")
+    .attr("transform", `translate(0,${height - 120})`)
+    .call(d3.axisBottom(bandScale));
+
+  svg.append("g")
+    .attr("transform", `translate(${margin.left},0)`)
+    .call(d3.axisLeft(bandY));
+
+  svg.selectAll(".bar")
+    .data([20, 35, 15, 40])
+    .enter()
+    .append("rect")
+    .attr("x", (d, i) => bandScale(categories[i]))
+    .attr("y", d => bandY(d))
+    .attr("width", bandScale.bandwidth())
+    .attr("height", d => bandY(0) - bandY(d))
+    .attr("fill", "#38bdf8");
+
+  /* ------------------------------------------------
+     3️⃣ Time Scale (Dates → Timeline)
+  ------------------------------------------------ */
+  const dates = [
+    new Date("2024-01-01"),
+    new Date("2024-02-01"),
+    new Date("2024-03-01"),
+    new Date("2024-04-01")
+  ];
+
+  const timeScale = d3.scaleTime()
+    .domain(d3.extent(dates))
+    .range([margin.left, width - margin.right]);
+
+  svg.append("g")
+    .attr("transform", `translate(0,${height - 300})`)
+    .call(d3.axisBottom(timeScale));
+
+  svg.append("text")
+    .attr("x", margin.left)
+    .attr("y", height - 320)
+    .text("Time Scale (Dates)");
+
+  /* ------------------------------------------------
+     4️⃣ Ordinal Scale (Categories → Colors)
+  ------------------------------------------------ */
+  const colorScale = d3.scaleOrdinal()
+    .domain(categories)
+    .range(["#22c55e", "#f97316", "#a855f7", "#ef4444"]);
+
+  svg.selectAll(".legend")
+    .data(categories)
+    .enter()
+    .append("circle")
+    .attr("cx", (d, i) => margin.left + i * 120)
+    .attr("cy", 40)
+    .attr("r", 8)
+    .attr("fill", d => colorScale(d));
+
+  svg.selectAll(".legend-label")
+    .data(categories)
+    .enter()
+    .append("text")
+    .attr("x", (d, i) => margin.left + i * 120 + 15)
+    .attr("y", 45)
+    .text(d => `Category ${d}`);
+
+</script>
+
+</body>
+</html>

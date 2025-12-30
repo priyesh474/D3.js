@@ -1,0 +1,19 @@
+body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+    .chart-title {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+    .tooltip {
+      position: absolute;
+      background: #111827;
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      pointer-events: none;
+      opacity: 0;
+    }

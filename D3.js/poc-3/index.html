@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>D3 SVG PoC</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+  </style>
+</head>
+<body>
+
+<h3>D3 PoC: Grid, Axes & Labels</h3>
+
+<svg width="600" height="350"></svg>
+
+<script>
+  const svg = d3.select("svg");
+
+  const width = 600;
+  const height = 350;
+  const margin = { top: 20, right: 20, bottom: 40, left: 50 };
+
+  /* ------------------ SCALES ------------------ */
+  const xScale = d3.scaleLinear()
+    .domain([0, 100])
+    .range([margin.left, width - margin.right]);
+
+  const yScale = d3.scaleLinear()
+    .domain([0, 100])
+    .range([height - margin.bottom, margin.top]);
+
+  /* ------------------ GRID LINES ------------------ */
+  // Vertical grid lines
+  svg.append("g")
+    .attr("stroke", "#334155")
+    .selectAll("line")
+    .data(xScale.ticks(10))
+    .enter()
+    .append("line")
+    .attr("x1", d => xScale(d))
+    .attr("x2", d => xScale(d))
+    .attr("y1", margin.top)
+    .attr("y2", height - margin.bottom);
+
+  // Horizontal grid lines
+  svg.append("g")
+    .attr("stroke", "#334155")
+    .selectAll("line")
+    .data(yScale.ticks(10))
+    .enter()
+    .append("line")
+    .attr("y1", d => yScale(d))
+    .attr("y2", d => yScale(d))
+    .attr("x1", margin.left)
+    .attr("x2", width - margin.right);
+
+  /* ------------------ AXES-LIKE SHAPES ------------------ */
+  // X Axis
+  svg.append("line")
+    .attr("x1", margin.left)
+    .attr("x2", width - margin.right)
+    .attr("y1", height - margin.bottom)
+    .attr("y2", height - margin.bottom)
+    .attr("stroke", "white")
+    .attr("stroke-width", 2);
+
+  // Y Axis
+  svg.append("line")
+    .attr("x1", margin.left)
+    .attr("x2", margin.left)
+    .attr("y1", margin.top)
+    .attr("y2", height - margin.bottom)
+    .attr("stroke", "white")
+    .attr("stroke-width", 2);
+
+  /* ------------------ LABELED SHAPES ------------------ */
+  const data = [
+    { x: 20, y: 30, label: "A" },
+    { x: 50, y: 60, label: "B" },
+    { x: 80, y: 40, label: "C" }
+  ];
+
+  const group = svg.append("g");
+
+  // Circles
+  group.selectAll("circle")
+    .data(data)
+    .enter()
+    .append("circle")
+    .attr("cx", d => xScale(d.x))
+    .attr("cy", d => yScale(d.y))
+    .attr("r", 6)
+    .attr("fill", "#38bdf8");
+
+  // Labels
+  group.selectAll("text")
+    .data(data)
+    .enter()
+    .append("text")
+    .attr("x", d => xScale(d.x) + 8)
+    .attr("y", d => yScale(d.y) - 8)
+    .text(d => d.label)
+    .attr("font-size", "12px")
+    .attr("fill", "#e5e7eb");
+
+</script>
+
+</body>
+</html>
+ 
